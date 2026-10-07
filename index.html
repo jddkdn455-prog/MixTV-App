@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MixTV - البث المباشر</title>
+  <!-- Video.js Stylesheet -->
+  <link href="https://vjs.zencdn.net/7.20.3/video-js.css" rel="stylesheet" />
+  <!-- Video.js Quality Selector Plugin Stylesheet -->
+  <link href="https://unpkg.com/@silvermine/videojs-quality-selector/dist/silvermine-videojs-quality-selector.css" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding-bottom: 20px;
+    }
+
+    header {
+      background-color: #1e293b;
+      padding: 1rem;
+      text-align: center;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #38bdf8;
+      letter-spacing: 1px;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      gap: 1rem;
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .player-section {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .video-container {
+      width: 100%;
+      background-color: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    }
+
+    .video-js {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 9;
+    }
+
+    .channel-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      background-color: #1e293b;
+      padding: 0.8rem 1rem;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    /* التبويبات */
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      background-color: #1e293b;
+      padding: 0.5rem;
+      border-radius: 10px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 0.6rem;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 0.95rem;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background-color: #0284c7;
+      color: #fff;
+    }
+
+    /* قائمة القنوات */
+    .playlist-section {
+      background-color: #1e293b;
+      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .channel-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .channel-item {
+      padding: 0.8rem 1rem;
+      background-color: #334155;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .channel-item:hover {
+      background-color: #475569;
+    }
+
+    .channel-item.active {
+      background-color: #0284c7;
+      color: #fff;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      background-color: #0f172a;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      color: #38bdf8;
+    }
+
+    .badge-quality {
+      font-size: 0.75rem;
+      background-color: #15803d;
+      color: #fff;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">MixTV</div>
+  </header>
+
+  <div class="container">
+    <!-- مشغل الفيديو -->
+    <div class="player-section">
+      <div class="video-container">
+        <video id="main-player" class="video-js vjs-big-play-centered" controls preload="auto">
+          <source src="https://live-hls-apps-aja-fa.getaj.net/AJA/01.m3u8" type="application/x-mpegURL">
+        </video>
+      </div>
+      <div class="channel-title" id="current-channel-name">قناة الجزيرة الإخبارية</div>
+    </div>
+
+    <!-- التبويبات -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('general')">القنوات العامة</button>
+      <button class="tab-btn" onclick="switchTab('sports')">القنوات الرياضية</button>
+    </div>
+
+    <!-- محتوى القنوات -->
+    <div class="playlist-section">
+      
+      <!-- قسم القنوات العامة -->
+      <div id="general" class="tab-content active">
+        <ul class="channel-list">
+          <li class="channel-item active" onclick="playChannel('https://live-hls-apps-aja-fa.getaj.net/AJA/01.m3u8', 'قناة الجزيرة الإخبارية', this)">
+            <span>قناة الجزيرة الإخبارية</span>
+            <div>
+              <span class="badge-quality">مباشر</span>
+              <span class="badge">متعدد الجودات</span>
+            </div>
+          </li>
+          <li class="channel-item" onclick="playChannel('https://live.kwikmotion.com/alaraby1live/alaraby_abr/playlist.m3u8', 'التلفزيون العربي', this)">
+            <span>التلفزيون العربي</span>
+            <div>
+              <span class="badge-quality">مباشر</span>
+              <span class="badge">متعدد الجودات</span>
+            </div>
+          </li>
+          <li class="channel-item" onclick="playChannel('https://live.kwikmotion.com/alaraby2live/alaraby2.smil/playlist.m3u8', 'التلفزيون العربي 2', this)">
+            <span>التلفزيون العربي 2</span>
+            <div>
+              <span class="badge-quality">مباشر</span>
+              <span class="badge">متعدد الجودات</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- قسم القنوات الرياضية -->
+      <div id="sports" class="tab-content">
+        <ul class="channel-list">
+          <li class="channel-item" onclick="playChannel('https://live.kwikmotion.com/alaraby1live/alaraby_abr/playlist.m3u8', 'قناة رياضية تجريبية', this)">
+            <span>قناة رياضية تجريبية</span>
+            <div>
+              <span class="badge">سيرفر تجريبي</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Video.js Scripts & Quality Control -->
+  <script src="https://vjs.zencdn.net/7.20.3/video.min.js"></script>
+  <script src="https://unpkg.com/@silvermine/videojs-quality-selector/dist/silvermine-videojs-quality-selector.min.js"></script>
+
+  <script>
+    const player = videojs('main-player', {
+      controlBar: {
+        children: [
+          'playToggle',
+          'volumePanel',
+          'currentTimeDisplay',
+          'timeDivider',
+          'durationDisplay',
+          'progressControl',
+          'liveDisplay',
+          'qualitySelector',
+          'fullscreenToggle',
+        ],
+      },
+    });
+
+    player.controlBar.addChild('QualitySelector');
+
+    function playChannel(url, name, element) {
+      player.src({
+        src: url,
+        type: 'application/x-mpegURL'
+      });
+      player.play();
+
+      document.getElementById('current-channel-name').innerText = name;
+
+      const items = document.querySelectorAll('.channel-item');
+      items.forEach(item => item.classList.remove('active'));
+      element.classList.add('active');
+    }
+
+    function switchTab(tabId) {
+      const tabs = document.querySelectorAll('.tab-btn');
+      const contents = document.querySelectorAll('.tab-content');
+
+      tabs.forEach(tab => tab.classList.remove('active'));
+      contents.forEach(content => content.classList.remove('active'));
+
+      event.currentTarget.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+  </script>
+</body>
+  </html>
+  
