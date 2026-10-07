@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mix TV</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { background-color: #121212; color: #fff; padding-bottom: 20px; }
+        header { background-color: #1f1f1f; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; color: #e50914; }
+        nav { display: flex; justify-content: space-around; background-color: #282828; padding: 10px; position: sticky; top: 0; z-index: 100; }
+        nav button { background: none; border: none; color: #aaa; font-size: 16px; font-weight: bold; padding: 8px 16px; cursor: pointer; }
+        nav button.active { color: #fff; border-bottom: 3px solid #e50914; }
+        .section { display: none; padding: 15px; }
+        .section.active { display: block; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; }
+        .card { background-color: #1f1f1f; border-radius: 8px; overflow: hidden; text-align: center; font-size: 13px; cursor: pointer; }
+        .card img { width: 100%; height: 150px; object-fit: cover; }
+        .card p { padding: 8px 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .category-title { font-size: 18px; margin: 15px 0 10px; color: #e50914; border-right: 4px solid #e50914; padding-right: 8px; }
+    </style>
+</head>
+<body>
+
+    <header>Mix TV</header>
+
+    <nav>
+        <button class="active" onclick="showTab('sports')">الرياضة</button>
+        <button onclick="showTab('movies')">الأفلام</button>
+        <button onclick="showTab('series')">المسلسلات</button>
+    </nav>
+
+    <!-- قسم الرياضة -->
+    <div id="sports" class="section active">
+        <div class="category-title">قنوات beIN SPORTS العربية</div>
+        <div class="grid" id="sports-grid"></div>
+    </div>
+
+    <!-- قسم الأفلام -->
+    <div id="movies" class="section">
+        <div id="movies-container"></div>
+    </div>
+
+    <!-- قسم المسلسلات (مؤقت) -->
+    <div id="series" class="section">
+        <div class="category-title">المسلسلات</div>
+        <p style="text-align: center; color: #888; margin-top: 30px;">سيتم إضافتها قريباً...</p>
+    </div>
+
+    <script>
+        function showTab(tabId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // قنوات بي إن سبورت العربية
+        const sportsChannels = [
+            { name: "beIN Sports 1 SD", url: "http://iptv.am000.tv:8000/live/add17/add17/293.ts" },
+            { name: "beIN Sports 2 SD", url: "http://iptv.am000.tv:8000/live/add17/add17/294.ts" },
+            { name: "beIN Sports 3 SD", url: "http://iptv.am000.tv:8000/live/add17/add17/295.ts" },
+            { name: "beIN Sports 4 SD", url: "http://iptv.am000.tv:8000/live/add17/add17/296.ts" },
+            { name: "beIN Sports 5 SD", url: "http://iptv.am000.tv:8000/live/add17/add17/297.ts" },
+            { name: "beIN Sports 6 SD", url: "http://iptv.am000.tv:8000/live/add17/add17/298.ts" },
+            { name: "beIN Sports 7 SD", url: "http://iptv.am000.tv:8000/live/add17/add17/299.ts" },
+            { name: "beIN Sports 8 SD", url: "http://iptv.am000.tv:8000/live/add17/add17/300.ts" },
+            { name: "beIN Sports 9 SD", url: "http://iptv.am000.tv:8000/live/add17/add17/301.ts" },
+            { name: "beIN Sports 10 SD", url: "http://iptv.am000.tv:8000/live/add17/add17/302.ts" }
+        ];
+
+        // قوائم الأفلام الـ 14 المصنفة
+        const movieCategories = [
+            { title: "أفضل أفلام IMDB", url: "https://aymrgknetzpucldhpkwm.supabase.co/storage/v1/object/public/tmdb/top-movies.m3u" },
+            { title: "أفلام رعب", url: "https://aymrgknetzpucldhpkwm.supabase.co/storage/v1/object/public/tmdb/horror-movies.m3u" },
+            { title: "أفلام مغامرات", url: "https://aymrgknetzpucldhpkwm.supabase.co/storage/v1/object/public/tmdb/adventure-movies.m3u" },
+            { title: "أفلام كوميدية", url: "https://aymrgknetzpucldhpkwm.supabase.co/storage/v1/object/public/tmdb/comedy-movies.m3u" },
+            { title: "أفلام جريمة", url: "https://aymrgknetzpucldhpkwm.supabase.co/storage/v1/object/public/tmdb/crime-movies.m3u" },
+            { title: "أفلام وثائقية", url: "https://aymrgknetzpucldhpkwm.supabase.co/storage/v1/object/public/tmdb/documentary-movies.m3u" },
+            { title: "أفلام عائلية", url: "https://aymrgknetzpucldhpkwm.supabase.co/storage/v1/object/public/tmdb/family-movies.m3u" },
+            { title: "أفلام خيالي (Fantasy)", url: "https://aymrgknetzpucldhpkwm.supabase.co/storage/v1/object/public/tmdb/fantasy-movies.m3u" },
+            { title: "أفلام تاريخية", url: "https://aymrgknetzpucldhpkwm.supabase.co/storage/v1/object/public/tmdb/history-movies.m3u" },
+            { title: "أفلام غموض", url: "https://aymrgknetzpucldhpkwm.supabase.co/storage/v1/object/public/tmdb/mystery-movies.m3u" },
+            { title: "أفلام رومانسية", url: "https://aymrgknetzpucldhpkwm.supabase.co/storage/v1/object/public/tmdb/romance-movies.m3u" },
+            { title: "أفلام خيال علمي", url: "https://aymrgknetzpucldhpkwm.supabase.co/storage/v1/object/public/tmdb/science-fiction-movies.m3u" },
+            { title: "أفلام حرب", url: "https://aymrgknetzpucldhpkwm.supabase.co/storage/v1/object/public/tmdb/war-movies.m3u" },
+            { title: "تلفزيون عام", url: "https://iptv-org.github.io/iptv/index.m3u" }
+        ];
+
+        // عرض قنوات الرياضة
+        const sportsGrid = document.getElementById('sports-grid');
+        sportsChannels.forEach(ch => {
+            sportsGrid.innerHTML += `
+                <div class="card" onclick="window.open('${ch.url}', '_blank')">
+                    <div style="height: 100px; background: #333; display:flex; align-items:center; justify-content:center; font-weight:bold;">beIN</div>
+                    <p>${ch.name}</p>
+                </div>
+            `;
+        });
+
+        // دالة تحكم جلب القوائم الديناميكية loadM3UPlaylist
+        async function loadM3UPlaylist(url, containerId, categoryTitle) {
+            try {
+                const response = await fetch(url);
+                const text = await response.text();
+                const lines = text.split('\n');
+                
+                let container = document.getElementById(containerId);
+                let html = `<div class="category-title">${categoryTitle}</div><div class="grid">`;
+                
+                let count = 0;
+                for (let i = 0; i < lines.length; i++) {
+                    if (lines[i].startsWith('#EXTINF:') && count < 12) { // عرض أول 12 فيلم من كل تصنيف لتسريع التحميل
+                        let name = lines[i].split(',')[1] || "فيلم";
+                        let streamUrl = lines[i+1] ? lines[i+1].trim() : "#";
+                        html += `
+                            <div class="card" onclick="window.open('${streamUrl}', '_blank')">
+                                <div style="height: 120px; background: #222; display:flex; align-items:center; justify-content:center; padding:5px;">🎬</div>
+                                <p>${name}</p>
+                            </div>
+                        `;
+                        count++;
+                    }
+                }
+                html += `</div>`;
+                container.innerHTML += html;
+            } catch (e) {
+                console.log("Error loading category: " + categoryTitle);
+            }
+        }
+
+        // تحميل تصنيفات الأفلام عند فتح الصفحة
+        movieCategories.forEach(cat => {
+            loadM3UPlaylist(cat.url, 'movies-container', cat.title);
+        });
+    </script>
+</body>
+</html>
