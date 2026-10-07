@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ميكس تي في 📺 Mix TV</title>
+  <style>
+    /* 🎨 ألوان وتنسيقات عصرية ومتناسقة */
+    :root {
+      --bg-color: #0f172a;       /* أزرق داكن/رمادي عميق */
+      --card-bg: #1e293b;     /* خلفية البطاقات */
+      --primary-grad: linear-gradient(135deg, #6366f1, #a855f7); /* تدرج بنفجسي/أزرق */
+      --accent-gold: #f59e0b;    /* برتقالي ذهبي للتقييمات والمباريات */
+      --text-color: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 12px;
+      font-size: 13px; /* تصغير حجم الخط العام */
+    }
+
+    /* 📺 الشريط العلوي */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 10px;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: bold;
+      background: linear-gradient(to right, #38bdf8, #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .search-bar {
+      width: 100%;
+      max-width: 320px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid #334155;
+      background-color: #1e293b;
+      color: #fff;
+      font-size: 12px;
+      outline: none;
+    }
+
+    /* 🧭 شريط التنقل الأنيق والمدمج */
+    nav {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 8px;
+    }
+
+    nav button {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      padding: 6px 12px;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    nav button.active, nav button:hover {
+      background: var(--primary-grad);
+      color: #fff;
+      font-weight: bold;
+    }
+
+    /* 🧱 شبكة العرض والبطاقات المصغرة */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1px solid #334155;
+      transition: transform 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: #6366f1;
+    }
+
+    .card img {
+      width: 100%;
+      height: 140px; /* تقليل ارتفاع الملصقات لملاءمة الشاشة */
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 6px;
+    }
+
+    .card h3 {
+      font-size: 12px;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card p {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    /* 🔘 أزرار المشاهدة */
+    .btn-watch {
+      background: var(--primary-grad);
+      color: #fff;
+      border: none;
+      padding: 5px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: bold;
+      width: 100%;
+    }
+
+    /* 🎬 صفوف المسلسلات والمباريات المصغرة */
+    .show-block {
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #334155;
+    }
+
+    .episode-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #0f172a;
+      padding: 6px 10px;
+      border-radius: 4px;
+      margin-top: 6px;
+      font-size: 12px;
+    }
+
+    /* ⚽ بطاقات المباريات المصغرة */
+    .match-card {
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      padding: 10px;
+      border: 1px solid #334155;
+      text-align: center;
+    }
+
+    .match-card h4 {
+      color: var(--accent-gold);
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    /* 🎬 مشغل الفيديو الداخلي والرسائل */
+    #playerModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    #playerModal.active {
+      display: flex;
+    }
+
+    .player-box {
+      width: 90%;
+      max-width: 750px;
+      position: relative;
+    }
+
+    video {
+      width: 100%;
+      border-radius: 8px;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: -30px;
+      left: 0;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 15px;
+      right: 15px;
+      background-color: #ef4444;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 6px;
+      display: none;
+      font-size: 12px;
+      z-index: 2000;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 📺 الهيدر والبحث -->
+  <header>
+    <div class="logo">ميكس تي في 📺 Mix TV</div>
+    <input type="text" id="searchInput" class="search-bar" placeholder="🔍 ابحث عن فيلم، مسلسل، حلقة، قناة، أو مباراة...">
+  </header>
+
+  <!-- 🧭 التبويبات مع الإيموجيات -->
+  <nav id="navTabs">
+    <button class="active" onclick="switchTab('movies')">🍿 الأفلام</button>
+    <button onclick="switchTab('shows')">🎬 المسلسلات</button>
+    <button onclick="switchTab('channels')">📡 القنوات</button>
+    <button onclick="switchTab('matches')">⚽ المباريات</button>
+  </nav>
+
+  <!-- 🧱 الحاوية الرئيسية للمحتوى -->
+  <main id="mainContent"></main>
+
+  <!-- 🎬 نافذة مشغل الفيديو -->
+  <div id="playerModal">
+    <div class="player-box">
+      <button class="close-btn" onclick="closePlayer()">إغلاق ✕</button>
+      <video id="videoPlayer" controls></video>
+    </div>
+  </div>
+
+  <!-- ⚠️ التنبيهات -->
+  <div id="toast" class="toast">المشاهدة غير متاحة حالياً</div>
+
+  <script>
+    /* ==========================================
+       1. البيانات المحدثة 🍿🎬📡⚽
+       ========================================== */
+    const moviesData = [
+      {
+        id: "m1",
+        title: "Big Buck Bunny",
+        poster: "https://upload.wikimedia.org/wikipedia/commons/c/c5/Big_buck_bunny_poster_big.jpg",
+        year: 2008,
+        rating: 8.1,
+        description: "فيلم قصير متاح قانونياً.",
+        watchUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+      }
+    ];
+
+    const showsData = [
+      {
+        id: "s1",
+        title: "Tears of Steel",
+        seasons: [
+          {
+            seasonNumber: 1,
+            episodes: [
+              {
+                id: "e1",
+                episodeNumber: 1,
+                title: "الحلقة الأولى",
+                watchUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"
+              }
+            ]
+          }
+        ]
+      }
+    ];
+
+    // 📡 إضافة قنوات beIN SPORTS التسعة + القنوات الأخرى
+    const channelsData = [
+      { id: "b1", name: "beIN SPORTS 1 HD", logo: "https://via.placeholder.com/150/1e293b/ffffff?text=beIN+1", officialUrl: "" },
+      { id: "b2", name: "beIN SPORTS 2 HD", logo: "https://via.placeholder.com/150/1e293b/ffffff?text=beIN+2", officialUrl: "" },
+      { id: "b3", name: "beIN SPORTS 3 HD", logo: "https://via.placeholder.com/150/1e293b/ffffff?text=beIN+3", officialUrl: "" },
+      { id: "b4", name: "beIN SPORTS 4 HD", logo: "https://via.placeholder.com/150/1e293b/ffffff?text=beIN+4", officialUrl: "" },
+      { id: "b5", name: "beIN SPORTS 5 HD", logo: "https://via.placeholder.com/150/1e293b/ffffff?text=beIN+5", officialUrl: "" },
+      { id: "b6", name: "beIN SPORTS 6 HD", logo: "https://via.placeholder.com/150/1e293b/ffffff?text=beIN+6", officialUrl: "" },
+      { id: "b7", name: "beIN SPORTS 7 HD", logo: "https://via.placeholder.com/150/1e293b/ffffff?text=beIN+7", officialUrl: "" },
+      { id: "b8", name: "beIN SPORTS 8 HD", logo: "https://via.placeholder.com/150/1e293b/ffffff?text=beIN+8", officialUrl: "" },
+      { id: "b9", name: "beIN SPORTS 9 HD", logo: "https://via.placeholder.com/150/1e293b/ffffff?text=beIN+9", officialUrl: "" },
+      {
+        id: "c1",
+        name: "القناة الإخبارية التعليمية",
+        logo: "https://via.placeholder.com/150/1e293b/ffffff?text=News",
+        officialUrl: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+      }
+    ];
+
+    const matchesData = [
+      {
+        id: "mt1",
+        tournament: "🏆 الدوري المحلي",
+        teamA: "الفريق الأول",
+        teamB: "الفريق الثاني",
+        date: "2026-10-07",
+        time: "20:00",
+        status: "🔴 مباشر",
+        watchUrl: ""
+      }
+    ];
+
+    let currentTab = 'movies';
+
+    /* ==========================================
+       2. منطق المشغل والروابط
+       ========================================== */
+    function handleWatch(url) {
+      if (!url || url.trim() === '') {
+        showToast('المشاهدة غير متاحة حالياً');
+        return;
+      }
+
+      const directExts = ['.m3u8', '.mp4', '.webm', '.ogg'];
+      const isDirect = directExts.some(ext => url.toLowerCase().includes(ext));
+
+      if (isDirect) {
+        const modal = document.getElementById('playerModal');
+        const player = document.getElementById('videoPlayer');
+        player.src = url;
+        modal.classList.add('active');
+        player.play();
+      } else {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
+    }
+
+    function closePlayer() {
+      const modal = document.getElementById('playerModal');
+      const player = document.getElementById('videoPlayer');
+      player.pause();
+      player.src = '';
+      modal.classList.remove('active');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+
+    /* ==========================================
+       3. العرض والتحكم بالتنقل
+       ========================================== */
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('searchInput').value = '';
+      renderContent();
+    }
+
+    function renderContent() {
+      const container = document.getElementById('mainContent');
+      container.innerHTML = '';
+
+      if (currentTab === 'movies') {
+        const grid = document.createElement('div');
+        grid.className = 'grid';
+        moviesData.forEach(m => {
+          grid.innerHTML += `
+            <div class="card">
+              <img src="${m.poster}" alt="${m.title}">
+              <h3>🍿 ${m.title}</h3>
+              <p>⭐️ ${m.rating} | ${m.year}</p>
+              <button class="btn-watch" onclick="handleWatch('${m.watchUrl}')">▶ مشاهدة</button>
+            </div>`;
+        });
+        container.appendChild(grid);
+      } 
+      else if (currentTab === 'shows') {
+        showsData.forEach(s => {
+          let html = `<div class="show-block"><h2>🎬 ${s.title}</h2>`;
+          s.seasons.forEach(sn => {
+            html += `<h4 style="margin-top:6px; color:var(--text-muted);">الموسم ${sn.seasonNumber}</h4>`;
+            sn.episodes.forEach(ep => {
+              html += `
+                <div class="episode-row">
+                  <span>▶ حلقة ${ep.episodeNumber}: ${ep.title}</span>
+                  <button class="btn-watch" style="width:auto;" onclick="handleWatch('${ep.watchUrl}')">مشاهدة</button>
+                </div>`;
+            });
+          });
+          html += `</div>`;
+          container.innerHTML += html;
+        });
+      } 
+      else if (currentTab === 'channels') {
+        const grid = document.createElement('div');
+        grid.className = 'grid';
+        channelsData.forEach(c => {
+          grid.innerHTML += `
+            <div class="card">
+              <img src="${c.logo}" alt="${c.name}" style="height:70px; object-fit:contain;">
+              <h3>📡 ${c.name}</h3>
+              <button class="btn-watch" onclick="handleWatch('${c.officialUrl}')">▶ بث مباشر</button>
+            </div>`;
+        });
+        container.appendChild(grid);
+      } 
+      else if (currentTab === 'matches') {
+        const grid = document.createElement('div');
+        grid.className = 'grid';
+        matchesData.forEach(mt => {
+          grid.innerHTML += `
+            <div class="match-card">
+              <h4>${mt.tournament}</h4>
+              <p style="font-weight:bold; margin:4px 0;">⚽ ${mt.teamA} ضد ${mt.teamB}</p>
+              <p style="font-size:11px; color:var(--text-muted);">${mt.date} - ⏰ ${mt.time}</p>
+              <p style="font-size:11px; margin-bottom:6px;">${mt.status}</p>
+              <button class="btn-watch" onclick="handleWatch('${mt.watchUrl}')">▶ مشاهدة المباراة</button>
+            </div>`;
+        });
+        container.appendChild(grid);
+      }
+    }
+
+    /* ==========================================
+       4. محرك البحث الشامل
+       ========================================== */
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+      const q = e.target.value.trim().toLowerCase();
+      if (!q) {
+        renderContent();
+        return;
+      }
+
+      const container = document.getElementById('mainContent');
+      container.innerHTML = `<h3 style="margin-bottom:10px;">🔍 نتائج البحث عن: "${q}"</h3>`;
+
+      const grid = document.createElement('div');
+      grid.className = 'grid';
+
+      // بحث الأفلام
+      moviesData.filter(m => m.title.toLowerCase().includes(q)).forEach(m => {
+        grid.innerHTML += `
+          <div class="card">
+            <img src="${m.poster}">
+            <h3>🍿 ${m.title}</h3>
+            <button class="btn-watch" onclick="handleWatch('${m.watchUrl}')">مشاهدة</button>
+          </div>`;
+      });
+
+      // بحث القنوات
+      channelsData.filter(c => c.name.toLowerCase().includes(q)).forEach(c => {
+        grid.innerHTML += `
+          <div class="card">
+            <h3>📡 ${c.name}</h3>
+            <button class="btn-watch" onclick="handleWatch('${c.officialUrl}')">مشاهدة</button>
+          </div>`;
+      });
+
+      container.appendChild(grid);
+    });
+
+    // التشغيل الأول عند فتح الصفحة
+    renderContent();
+  </script>
+</body>
+  </html>
+  
