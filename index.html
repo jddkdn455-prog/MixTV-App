@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>منصة البث المتكاملة</title>
+  <style>
+    /* التنسيقات العامة والتصميم */
+    :root {
+      --bg-color: #121212;
+      --card-bg: #1e1e1e;
+      --primary-color: #e50914;
+      --text-color: #ffffff;
+      --text-muted: #aaaaaa;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 20px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    .search-bar {
+      width: 100%;
+      max-width: 400px;
+      padding: 10px 15px;
+      border-radius: 6px;
+      border: 1px solid #333;
+      background-color: #222;
+      color: #fff;
+      font-size: 14px;
+    }
+
+    nav {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 25px;
+      border-bottom: 1px solid #333;
+      padding-bottom: 10px;
+    }
+
+    nav button {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 16px;
+      padding: 8px 16px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: 0.2s;
+    }
+
+    nav button.active, nav button:hover {
+      background-color: var(--primary-color);
+      color: #fff;
+    }
+
+    /* الشبكة والعناصر */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+    }
+
+    .card img {
+      width: 100%;
+      height: 260px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+
+    .card h3 {
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+
+    .card p {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .btn-watch {
+      background-color: var(--primary-color);
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+    }
+
+    /* أسلوب المسلسلات الحلقات */
+    .show-block {
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+
+    .episode-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #2a2a2a;
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 8px;
+    }
+
+    /* مشغل الفيديو والرسائل التنبيهية */
+    #playerModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    #playerModal.active {
+      display: flex;
+    }
+
+    .player-box {
+      width: 90%;
+      max-width: 800px;
+      position: relative;
+    }
+
+    video {
+      width: 100%;
+      border-radius: 8px;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: -35px;
+      left: 0;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #d9534f;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 6px;
+      display: none;
+      z-index: 2000;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- الهيدر والبحث -->
+  <header>
+    <div class="logo">منصة المشاهدة</div>
+    <input type="text" id="searchInput" class="search-bar" placeholder="ابحث عن فيلم، مسلسل، حلقة، قناة، أو مباراة...">
+  </header>
+
+  <!-- التبويبات -->
+  <nav id="navTabs">
+    <button class="active" onclick="switchTab('movies')">الأفلام</button>
+    <button onclick="switchTab('shows')">المسلسلات</button>
+    <button onclick="switchTab('channels')">القنوات</button>
+    <button onclick="switchTab('matches')">المباريات</button>
+  </nav>
+
+  <!-- الحاوية الرئيسية للمحتوى -->
+  <main id="mainContent"></main>
+
+  <!-- النافذة المنبثقة لمشغل الفيديو -->
+  <div id="playerModal">
+    <div class="player-box">
+      <button class="close-btn" onclick="closePlayer()">إغلاق ✕</button>
+      <video id="videoPlayer" controls></video>
+    </div>
+  </div>
+
+  <!-- التنبيهات -->
+  <div id="toast" class="toast">المشاهدة غير متاحة حالياً</div>
+
+  <script>
+    /* ==========================================
+       1. البيانات (يمكن فصلها في ملفات لاحقاً)
+       ========================================== */
+    const moviesData = [
+      {
+        id: "m1",
+        title: "Big Buck Bunny",
+        poster: "https://upload.wikimedia.org/wikipedia/commons/c/c5/Big_buck_bunny_poster_big.jpg",
+        year: 2008,
+        rating: 8.1,
+        description: "فيلم قصير مفتوح المصدر ومتاح قانونياً.",
+        watchUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+      }
+    ];
+
+    const showsData = [
+      {
+        id: "s1",
+        title: "Tears of Steel",
+        seasons: [
+          {
+            seasonNumber: 1,
+            episodes: [
+              {
+                id: "e1",
+                episodeNumber: 1,
+                title: "الحلقة الأولى",
+                watchUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"
+              }
+            ]
+          }
+        ]
+      }
+    ];
+
+    const channelsData = [
+      {
+        id: "c1",
+        name: "القناة الإخبارية التعليمية",
+        logo: "https://via.placeholder.com/150",
+        officialUrl: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+      }
+    ];
+
+    const matchesData = [
+      {
+        id: "mt1",
+        tournament: "الدوري المحلي",
+        teamA: "الفريق الأول",
+        teamB: "الفريق الثاني",
+        date: "2026-10-07",
+        time: "20:00",
+        status: "مباشر",
+        watchUrl: "" // فارغ لاختبار حالة غير متاح
+      }
+    ];
+
+    let currentTab = 'movies';
+
+    /* ==========================================
+       2. منطق المشغل والروابط
+       ========================================== */
+    function handleWatch(url) {
+      if (!url || url.trim() === '') {
+        showToast('المشاهدة غير متاحة حالياً');
+        return;
+      }
+
+      const directExts = ['.m3u8', '.mp4', '.webm', '.ogg'];
+      const isDirect = directExts.some(ext => url.toLowerCase().includes(ext));
+
+      if (isDirect) {
+        const modal = document.getElementById('playerModal');
+        const player = document.getElementById('videoPlayer');
+        player.src = url;
+        modal.classList.add('active');
+        player.play();
+      } else {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
+    }
+
+    function closePlayer() {
+      const modal = document.getElementById('playerModal');
+      const player = document.getElementById('videoPlayer');
+      player.pause();
+      player.src = '';
+      modal.classList.remove('active');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+
+    /* ==========================================
+       3. العرض والتحكم بالتنقل
+       ========================================== */
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('searchInput').value = '';
+      renderContent();
+    }
+
+    function renderContent() {
+      const container = document.getElementById('mainContent');
+      container.innerHTML = '';
+
+      if (currentTab === 'movies') {
+        const grid = document.createElement('div');
+        grid.className = 'grid';
+        moviesData.forEach(m => {
+          grid.innerHTML += `
+            <div class="card">
+              <img src="${m.poster}" alt="${m.title}">
+              <h3>${m.title} (${m.year})</h3>
+              <p>تقييم: ${m.rating}</p>
+              <button class="btn-watch" onclick="handleWatch('${m.watchUrl}')">مشاهدة</button>
+            </div>`;
+        });
+        container.appendChild(grid);
+      } 
+      else if (currentTab === 'shows') {
+        showsData.forEach(s => {
+          let html = `<div class="show-block"><h2>${s.title}</h2>`;
+          s.seasons.forEach(sn => {
+            html += `<h4 style="margin-top:10px;">الموسم ${sn.seasonNumber}</h4>`;
+            sn.episodes.forEach(ep => {
+              html += `
+                <div class="episode-row">
+                  <span>حلقة ${ep.episodeNumber}: ${ep.title}</span>
+                  <button class="btn-watch" style="width:auto;" onclick="handleWatch('${ep.watchUrl}')">مشاهدة</button>
+                </div>`;
+            });
+          });
+          html += `</div>`;
+          container.innerHTML += html;
+        });
+      } 
+      else if (currentTab === 'channels') {
+        const grid = document.createElement('div');
+        grid.className = 'grid';
+        channelsData.forEach(c => {
+          grid.innerHTML += `
+            <div class="card">
+              <img src="${c.logo}" alt="${c.name}" style="height:120px; object-fit:contain;">
+              <h3>${c.name}</h3>
+              <button class="btn-watch" onclick="handleWatch('${c.officialUrl}')">مشاهدة</button>
+            </div>`;
+        });
+        container.appendChild(grid);
+      } 
+      else if (currentTab === 'matches') {
+        const grid = document.createElement('div');
+        grid.className = 'grid';
+        matchesData.forEach(mt => {
+          grid.innerHTML += `
+            <div class="card">
+              <h3>${mt.tournament}</h3>
+              <p>${mt.teamA} ضد ${mt.teamB}</p>
+              <p>${mt.date} - ${mt.time} (${mt.status})</p>
+              <button class="btn-watch" onclick="handleWatch('${mt.watchUrl}')">مشاهدة المباراة</button>
+            </div>`;
+        });
+        container.appendChild(grid);
+      }
+    }
+
+    /* ==========================================
+       4. محرك البحث
+       ========================================== */
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+      const q = e.target.value.trim().toLowerCase();
+      if (!q) {
+        renderContent();
+        return;
+      }
+
+      const container = document.getElementById('mainContent');
+      container.innerHTML = `<h2>نتائج البحث عن: "${q}"</h2><br>`;
+
+      const grid = document.createElement('div');
+      grid.className = 'grid';
+
+      // بحث الأفلام
+      moviesData.filter(m => m.title.toLowerCase().includes(q)).forEach(m => {
+        grid.innerHTML += `
+          <div class="card">
+            <img src="${m.poster}">
+            <h3>[فيلم] ${m.title}</h3>
+            <button class="btn-watch" onclick="handleWatch('${m.watchUrl}')">مشاهدة</button>
+          </div>`;
+      });
+
+      // بحث القنوات
+      channelsData.filter(c => c.name.toLowerCase().includes(q)).forEach(c => {
+        grid.innerHTML += `
+          <div class="card">
+            <h3>[قناة] ${c.name}</h3>
+            <button class="btn-watch" onclick="handleWatch('${c.officialUrl}')">مشاهدة</button>
+          </div>`;
+      });
+
+      container.appendChild(grid);
+    });
+
+    // التشغيل الأول عند فتح الصفحة
+    renderContent();
+  </script>
+</body>
+  </html>
+      
